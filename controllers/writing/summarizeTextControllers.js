@@ -2,6 +2,7 @@ import { SummarizeWrittenAttempt, SummarizeTextQuestion } from "../../models/wri
 
 import mongoose from "mongoose";
 import stringSimilarity from "string-similarity";
+import { getVocabularyScore, getGrammarScore } from "../../utils/tools/tools.js";
 
 export const getAllQuestions = async (req, res) => {
   try {
@@ -231,14 +232,20 @@ export const submitSummarizeWrittenAttempt = async (req, res) => {
     }
 
     /* -------- 3. GRAMMAR & VOCAB (Original Logic) -------- */
-    let grammar = 2;
-    if (!/^[A-Z]/.test(summaryText.trim())) grammar -= 1;
-    if (!/[.!?]$/.test(summaryText.trim())) grammar -= 1;
-    if (grammar < 0) grammar = 0;
+    // let grammar = 2;
+    // if (!/^[A-Z]/.test(summaryText.trim())) grammar -= 1;
+    // if (!/[.!?]$/.test(summaryText.trim())) grammar -= 1;
+    // if (grammar < 0) grammar = 0;
 
-    let vocabulary = 2; 
-    if (wordCount < 10) vocabulary = 0;
-
+    // let vocabulary = 2; 
+    // if (wordCount < 10) vocabulary = 0;
+    
+    const {score:grammar, issues} = await getGrammarScore(summaryText);
+    
+    // Get vocabulary score
+    let vocabulary = await getVocabularyScore(summaryText); 
+    // Final combined score
+ 
     /* -------- 4. THE ZERO SCORE OVERRIDE (New Dot Logic) -------- */
     let score = content + grammar + vocabulary + formScore;
 
@@ -275,7 +282,7 @@ export const submitSummarizeWrittenAttempt = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      data: attempt,
+      data: {...attempt.toObject(), grammarIssues:issues},
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -1,5 +1,6 @@
 import { EssayAttempt, WriteEssayQuestion } from "../../models/writing/Essay.js";
 import mongoose from "mongoose";
+import { checkSpelling, getGrammarScore, getVocabularyScore } from "../../utils/tools/tools.js";
 
 export const getAllQuestions = async (req, res) => {
   try {
@@ -206,28 +207,33 @@ export const submitEssayAttempt = async (req, res) => {
     }
 
     // D. VOCABULARY (Max 2) - Lexical Range
-    const uniqueWords = new Set(words.map(w => w.toLowerCase())).size;
-    const lexicalRange = uniqueWords / wordCount;
-    let vocabulary = 0;
-    if (lexicalRange > 0.4 && wordCount > 100) vocabulary = 2;
-    else if (lexicalRange > 0.3) vocabulary = 1;
+    // const uniqueWords = new Set(words.map(w => w.toLowerCase())).size;
+    // const lexicalRange = uniqueWords / wordCount;
+    // let vocabulary = 0;
+    // if (lexicalRange > 0.4 && wordCount > 100) vocabulary = 2;
+    // else if (lexicalRange > 0.3) vocabulary = 1;
+    let vocabulary = await getVocabularyScore(essayText); 
 
     // E. GRAMMAR (Max 2)
     const sentences = essayText.split(/[.!?]+/).filter(s => s.trim().length > 0);
     const correctSentences = sentences.filter(s => /^[A-Z]/.test(s.trim())).length;
-    let grammar = 0;
-    if (sentences.length > 0) {
-        if (correctSentences / sentences.length > 0.8) grammar = 2;
-        else if (correctSentences / sentences.length > 0.5) grammar = 1;
-    }
+    const {score:grammar, issues} = await getGrammarScore(essayText);
+    
+    // let grammar = 0;
+    // if (sentences.length > 0) {
+    //     if (correctSentences / sentences.length > 0.8) grammar = 2;
+    //     else if (correctSentences / sentences.length > 0.5) grammar = 1;
+    // }
 
     // F. SPELLING (Max 2)
     // Simulated for now
-    let misspelledCount = Math.floor(Math.random() * 5); 
-    let spelling = 2;
-    if (misspelledCount === 1) spelling = 1;
-    else if (misspelledCount >= 2) spelling = 0;
+      // let misspelledCount = Math.floor(Math.random() * 5); 
+      // let spelling = 2;
+      // if (misspelledCount === 1) spelling = 1;
+      // else if (misspelledCount >= 2) spelling = 0;
 
+     const {spellingScore:spelling,misspelledWords }= await checkSpelling(essayText)
+     let  misspelledCount = misspelledWords.length
     // G. GENERAL LINGUISTIC RANGE (Max 2)
     let general = 0;
     if (content >= 3 && structure >= 1 && vocabulary >= 1) general = 2;
@@ -267,7 +273,7 @@ export const submitEssayAttempt = async (req, res) => {
 
     res.status(201).json({
         success: true,
-        data: attempt
+        data: {...attempt.toObject(),grammarIssues:issues,misspelledWords}
     });
 
   } catch (error) {
