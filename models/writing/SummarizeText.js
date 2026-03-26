@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose,{Schema} from "mongoose";
 
 const summarizeTextQuestionSchema = new mongoose.Schema(
   {
@@ -75,6 +75,8 @@ const summarizeWrittenAttemptSchema = new mongoose.Schema(
     misSpelled: { type: Number, default: 0 },
     structureErrors: { type: Number, default: 0 },
     styleIssues: { type: Number, default: 0 },
+
+    grammarIssues: { type: Schema.Types.Mixed},
 
   },
   { timestamps: true }

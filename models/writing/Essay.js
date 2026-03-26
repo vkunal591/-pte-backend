@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 const writeEssayQuestionSchema = new mongoose.Schema(
   {
     title: {
@@ -68,6 +68,9 @@ const EssayAttemptSchema = new mongoose.Schema({
   structureIssues: Number,
   styleIssues: Number,
 
+  grammarIssues: { type: Schema.Types.Mixed},
+  misspelledWords: { type: Schema.Types.Mixed},
+  
   createdAt: { type: Date, default: Date.now }
 });
 

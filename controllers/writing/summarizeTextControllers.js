@@ -157,6 +157,7 @@ export const  getSummarizeTextQuestionsWithAttempts = async (req, res) => {
                 misSpelled: 1,
                 structureErrors: 1,
                 styleIssues: 1,
+                grammarIssues:1,
                 timeTaken: 1,
                 createdAt: 1,
               },
@@ -240,7 +241,7 @@ export const submitSummarizeWrittenAttempt = async (req, res) => {
     // let vocabulary = 2; 
     // if (wordCount < 10) vocabulary = 0;
     
-    const {score:grammar, issues} = await getGrammarScore(summaryText);
+    const {score:grammar, grammarIssues} = await getGrammarScore(summaryText);
     
     // Get vocabulary score
     let vocabulary = await getVocabularyScore(summaryText); 
@@ -278,11 +279,12 @@ export const submitSummarizeWrittenAttempt = async (req, res) => {
       form: formScore,
       readingScore,
       writingScore,
+      grammarIssues
     });
 
     res.status(201).json({
       success: true,
-      data: {...attempt.toObject(), grammarIssues:issues},
+      data: attempt,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

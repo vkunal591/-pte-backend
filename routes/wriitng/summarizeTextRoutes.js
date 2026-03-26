@@ -10,7 +10,7 @@ import { checkPracticeLimit } from "../../middlewares/practiceLimitMiddleware.js
 router.post("/add",  createSummarizeTextQuestion);
 router.put("/:id", updateSummarizeTextQuestion)
 router.delete("/:id", deleteSummarizeTextQuestion)
-router.post("/submit", checkPracticeLimit, submitSummarizeWrittenAttempt);
+router.post("/submit",  submitSummarizeWrittenAttempt);
 router.get("/all", getAllQuestions);
 router.get("/get/:userId",  getSummarizeTextQuestionsWithAttempts);
 router.get("/community/:questionId", getSummarizeTextQuestionsWithCommunityAttempts)

@@ -217,7 +217,7 @@ export const submitEssayAttempt = async (req, res) => {
     // E. GRAMMAR (Max 2)
     const sentences = essayText.split(/[.!?]+/).filter(s => s.trim().length > 0);
     const correctSentences = sentences.filter(s => /^[A-Z]/.test(s.trim())).length;
-    const {score:grammar, issues} = await getGrammarScore(essayText);
+    const {score:grammar, grammarIssues} = await getGrammarScore(essayText);
     
     // let grammar = 0;
     // if (sentences.length > 0) {
@@ -232,7 +232,7 @@ export const submitEssayAttempt = async (req, res) => {
       // if (misspelledCount === 1) spelling = 1;
       // else if (misspelledCount >= 2) spelling = 0;
 
-     const {spellingScore:spelling,misspelledWords }= await checkSpelling(essayText)
+     const {spellingScore:spelling,spellingErrors:misspelledWords }= await checkSpelling(essayText)
      let  misspelledCount = misspelledWords.length
     // G. GENERAL LINGUISTIC RANGE (Max 2)
     let general = 0;
@@ -268,12 +268,14 @@ export const submitEssayAttempt = async (req, res) => {
       misspelled: misspelledCount,
       grammarErrors: sentences.length - correctSentences,
       structureIssues: paragraphs < 3 ? 1 : 0,
-      styleIssues: foundTransitions < 3 ? 1 : 0
+      styleIssues: foundTransitions < 3 ? 1 : 0,
+      grammarIssues,
+      misspelledWords
     });
 
     res.status(201).json({
         success: true,
-        data: {...attempt.toObject(),grammarIssues:issues,misspelledWords}
+        data: {...attempt.toObject(),grammarIssues,misspelledWords}
     });
 
   } catch (error) {
@@ -329,13 +331,15 @@ export const getWriteEssayQuestionsWithAttempts = async (req, res) => {
                 spelling: 1,
                 vocabulary: 1,
                 form: 1,
-                structure: 1,
+                structure: 1,  
                 general: 1,
                 misspelled: 1,
                 grammarErrors: 1,
                 structureIssues: 1,
                 styleIssues: 1,
                 timeTaken: 1,
+                grammarIssues:1,
+                misspelledWords:1,
                 createdAt: 1
               }
             }
