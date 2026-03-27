@@ -241,27 +241,26 @@ export const submitSummarizeWrittenAttempt = async (req, res) => {
     // let vocabulary = 2; 
     // if (wordCount < 10) vocabulary = 0;
     
-    const {score:grammar, grammarIssues} = await getGrammarScore(summaryText);
-    
+    let {score:grammar, grammarIssues} = await getGrammarScore(summaryText);
     // Get vocabulary score
     let vocabulary = await getVocabularyScore(summaryText); 
     // Final combined score
- 
+    
     /* -------- 4. THE ZERO SCORE OVERRIDE (New Dot Logic) -------- */
     let score = content + grammar + vocabulary + formScore;
-
+    
     // This counts how many times "." appears anywhere in the text
     const dotCount = (summaryText.match(/\./g) || []).length;
-
+    
     // If there are 2 or more dots (periods) anywhere in the whole text, everything becomes 0
     if (dotCount >= 2) {
-        score = 0;
-        content = 0;
-        grammar = 0;
-        vocabulary = 0;
-        formScore = 0;
+      score = 0;
+      content = 0;
+      grammar = 0;
+      vocabulary = 0;
+      formScore = 0;
     }
-
+    
     /* -------- 5. FINAL CALCULATION & SAVE -------- */
     const readingScore = score / 2;
     const writingScore = score / 2;

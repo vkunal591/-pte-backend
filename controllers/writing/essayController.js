@@ -217,7 +217,7 @@ export const submitEssayAttempt = async (req, res) => {
     // E. GRAMMAR (Max 2)
     const sentences = essayText.split(/[.!?]+/).filter(s => s.trim().length > 0);
     const correctSentences = sentences.filter(s => /^[A-Z]/.test(s.trim())).length;
-    const {score:grammar, grammarIssues} = await getGrammarScore(essayText);
+    let {score:grammar, grammarIssues} = await getGrammarScore(essayText);
     
     // let grammar = 0;
     // if (sentences.length > 0) {
